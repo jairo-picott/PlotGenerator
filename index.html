@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Twin Data Viewer</title>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <style>
+            #plot {
+                width: 100%;
+                height: 500px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="plot"></div>
+        <script>
+            // Parse URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const dataParam = params.get('data');
+        
+            // Parse data from URL parameter
+            const dataArray = JSON.parse(dataParam);
+        
+            // Prepare data arrays for x and y coordinates
+            let xData = [];
+            let yData = [];
+        
+            // Parse individual data points from dataArray
+            dataArray.forEach(entry => {
+                // Parse 'timestamp' date string to JavaScript Date object
+                let date = new Date(entry.timestamp);
+                // Push date and state to respective arrays
+                xData.push(date);
+                yData.push(parseFloat(entry.value));
+            });
+        
+            // Define data for plot
+            const plotData = [{
+                x: xData,
+                y: yData,
+                type: 'scatter'
+            }];
+        
+            // Create plot
+            Plotly.newPlot('plot', plotData);
+        </script>
+        
+        
+    </body>
+</html>
