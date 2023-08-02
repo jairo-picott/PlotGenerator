@@ -1,91 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Twin Data Viewer</title>
+        <title>Twin Data</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <style>
-            #plot {
-                width: 100%;
-                height: 500px;
-            }
-        </style>
     </head>
     <body>
-        <div id="plot"></div>
-        <script>
-            // Function to unpack the data
-            function unpack(series, key) {
-                return series.map(function(entry) {
-                    if (key === 'last_changed') {
-                        let date = new Date(Date.parse(entry[key]));
-                        console.log(date);
-                        return `${date.getFullYear()}-${('0' + (date.getMonth()+1)).slice(-2)}-${('0' + date.getDate()).slice(-2)} ${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()).slice(-2)}:${('0' + date.getSeconds()).slice(-2)}`;
-                    } else if (key === 'state') {
-                        return parseFloat(entry[key]);
-                    } else {
-                        return entry[key];
-                    }
-                });
-            }
-    
-            // Function to group data points by entity_id
-            function groupByEntityId(data) {
-                let groups = {};
-                data.forEach(function(item) {
-                    let listItem = groups[item.entity_id];
-                    if(listItem){
-                        listItem.push(item);
-                    } else {
-                        groups[item.entity_id] = [item];
-                    }
-                });
-                return Object.values(groups);
-            }
-    
-            // Main function to draw the plot
-            async function drawPlot() {
-                // Parse URL parameters
-                const params = new URLSearchParams(window.location.search);
-                const dataParam = params.get('data');
-    
-                // Parse data from URL parameter
-                let seriesArray = JSON.parse(dataParam);
-                seriesArray = seriesArray[0]; // Flatten the series array
-                seriesArray = groupByEntityId(seriesArray); // Group by entity_id
-    
-                // Array to hold all plotly series
-                var plotData = [];
-                
-                console.log(seriesArray);
-
-                seriesArray.forEach((series, index) => {
-                    let trace = {
-                        type: "scatter",
-                        mode: "lines",
-                        x: unpack(series, 'last_changed'),
-                        y: unpack(series, 'state'),
-                        line: {color: index % 2 === 0 ? '#17BECF' : '#7F7F7F'}, // Alternate colors for each series
-                        name: series[0].entity_id // Name the series after the entity_id
-                    };
-                    plotData.push(trace);
-                });
-    
-                var layout = {
-                    title: 'Custom Range',
-                    xaxis: {
-                        type: 'date'
-                    },
-                    yaxis: {
-                        autorange: true,
-                        type: 'linear'
-                    }
-                };
-    
-                Plotly.newPlot('plot', plotData, layout);
-            }
-    
-            // Call the main function
-            drawPlot();
-        </script>
+        <div id="plot"><!-- Plotly chart will be drawn inside this DIV --></div>
+        <script src="app.js"></script>
     </body>
 </html>
