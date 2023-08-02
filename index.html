@@ -32,9 +32,14 @@
                 // Parse individual data points from series
                 series.forEach(entry => {
                     // Parse 'timestamp' date string to JavaScript Date object
-                    let date = new Date(entry.last_changed);
+                    let dateObject = new Date(entry.last_changed);
+                    
+                    // Format date to 'YYYY-MM-DD HH:MM:SS' format
+                    let date = `${dateObject.getFullYear()}-${("0" + (dateObject.getMonth() + 1)).slice(-2)}-${("0" + dateObject.getDate()).slice(-2)} ${("0" + dateObject.getHours()).slice(-2)}:${("0" + dateObject.getMinutes()).slice(-2)}:${("0" + dateObject.getSeconds()).slice(-2)}`;
+                    
                     // Push date and state to respective arrays
                     xData.push(date);
+
                     yData.push(parseFloat(entry.state));
                 });
         
