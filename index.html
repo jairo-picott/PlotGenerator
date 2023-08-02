@@ -18,30 +18,40 @@
             const dataParam = params.get('data');
         
             // Parse data from URL parameter
-            const dataArray = JSON.parse(dataParam);
+            const dataSeriesArray = JSON.parse(dataParam);
         
-            // Prepare data arrays for x and y coordinates
-            let xData = [];
-            let yData = [];
+            // Prepare an array to hold all series data
+            let seriesData = [];
         
-            // Parse individual data points from dataArray
-            dataArray.forEach(entry => {
-                // Parse 'timestamp' date string to JavaScript Date object
-                let date = new Date(entry.timestamp);
-                // Push date and state to respective arrays
-                xData.push(date);
-                yData.push(parseFloat(entry.value));
+            // Parse individual series from dataSeriesArray
+            dataSeriesArray.forEach(series => {
+                // Prepare data arrays for x and y coordinates
+                let xData = [];
+                let yData = [];
+        
+                // Parse individual data points from series
+                series.forEach(entry => {
+                    // Parse 'timestamp' date string to JavaScript Date object
+                    let date = new Date(entry.last_changed);
+                    // Push date and state to respective arrays
+                    xData.push(date);
+                    yData.push(parseFloat(entry.state));
+                });
+        
+                // Define data for this series
+                const seriesPlotData = {
+                    x: xData,
+                    y: yData,
+                    type: 'scatter',
+                    name: series[0].entity_id // use entity_id as series name
+                };
+        
+                // Add this series' data to seriesData array
+                seriesData.push(seriesPlotData);
             });
         
-            // Define data for plot
-            const plotData = [{
-                x: xData,
-                y: yData,
-                type: 'scatter'
-            }];
-        
-            // Create plot
-            Plotly.newPlot('plot', plotData);
+            // Create plot with all series data
+            Plotly.newPlot('plot', seriesData);
         </script>
         
         
