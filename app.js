@@ -1,7 +1,9 @@
 const params = new URLSearchParams(window.location.search);
 const entityId = params.get('entity_id');
+const startTime = params.get('start_time');
+const endTime = params.get('end_time');
 
-fetch(`https://twin-app.netlify.app/.netlify/functions/proxy?entity_id=${entityId}`)
+fetch(`https://twin-app.netlify.app/.netlify/functions/proxy?entity_id=${entityId}&start_time=${startTime}&end_time=${endTime}`)
   .then(response => response.json())
   .then(data => {
     const xData = data.map(entry => new Date(entry.last_changed));
