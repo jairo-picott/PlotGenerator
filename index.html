@@ -8,33 +8,22 @@
 <body>
 	<div id="myDiv"></div>
 	<script>
-		function fetchDataAndPlot(sensorData) {
-  			fetch('https://twin-app.netlify.app/.netlify/functions/proxy', {
-    			method: 'POST',
-    			headers: {
-      				'Content-Type': 'application/json',
-    			},
-    			body: JSON.stringify(sensorData),
-  			})
-  			.then(response => response.json())
-  			.then(data => {
-    			const traces = data.map(item => ({
-      				x: item.map(point => new Date(point.last_changed)),
-      				y: item.map(point => point.state),
-      				mode: 'lines',
-      				name: item[0].entity_id,
-    			}));
+        function fetchDataAndPlot(jsonData) {
+            const data = jsonData;
+
+            const traces = data.map(item => ({
+              x: item.map(point => new Date(point.last_changed)),
+              y: item.map(point => point.state),
+              mode: 'lines',
+              name: item[0].entity_id,
+            }));
   
-    			const layout = {
-      				title: 'Sensor Data',
-    			};
+            const layout = {
+              title: 'Sensor Data',
+            };
   
-    			Plotly.newPlot('myDiv', traces, layout);
-  			})
-  			.catch((error) => {
-    			console.error('Error:', error);
-  			});
-		}
+            Plotly.newPlot('myDiv', traces, layout);
+        }
 	</script>
 </body>
 
