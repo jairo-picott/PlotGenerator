@@ -1,31 +1,66 @@
+const Plotly = require('plotly.js-node');
+
 exports.handler = async function(event, context) {
-    const { entity_id, start_time, end_time } = event.queryStringParameters;
+    //Ensure this function only runs for POST requests
+    if(event.httpMethod !== "POST") {
+        return {statusCode: 405, body: "Mthod Not Allowed"};
+    }
 
+    //Parse the HSON data sent in the request
+    let data;
     try {
-        const { default: fetch } = await import('node-fetch');
-
-        const response = await fetch(`http://192.168.0.100:8123/api/history/period/${start_time}?filter_entity_id=${entity_id}&end_time=${end_time}&minimal_response`, {
-            headers: {'Authorization': `Bearer ${process.env.HA_TOKEN}`}
-        });
-    
-        if (!response.ok) {
-            return {statusCode: response.status, body: response.statusText};
-        }
-    
-        const data = await response.json();
-    
-        return {
-            statusCode:200,
-            headers: {
-                "Access-Control-Allow-Origin" : "*"
-            },
-            body: JSON.stringify(data),
-        };
+        data = JSON.parse(event.body);
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.log("Error parsing JSON: ", error);
         return {
-            statusCode: 500,
-            body: 'Error fetching data'
+            statusCode: 400,
+            body: JSON.stringify({error: "Bad request body" }),
         };
-    }  
+    }
+
+    //Loop through each array in the data to create a separate series for each Entity ID passed
+    let traces = data.map(sensorData => {
+        // Extract valued from sensorData
+        const entityID = sensorData[0]["entity_id"];
+        const friendlyName = sensorData[0]["attributes"]["friendly_name"];
+        const xValues = sensorData.slice(1).map(item => new Date(item["last_changed"]));
+        const yValues = sensorData.slice(1).map(item => parseFloat(item["state"]));
+
+        return {
+            x: xValues,
+            y: yValues,
+            mode: 'lines',
+            name: friendlyName
+        };
+    });
+
+    var layout = {
+        title: 'Twin data viewer',
+        xaxis: {
+            title: 'Date',
+            showgrid: false,
+            zeroline: false,
+        },
+        yaxis: {
+            title: 'Measurement',
+            showline: false
+        },
+        showlegend: true
+    };
+
+    //Generate the plot
+
+    const figure = {'data': traces, layout: layout};
+    const imgOpts = {format: 'png', width: 1000, height: 500};
+
+    //Convert plot to image
+    var img = await Plotly.toImage(figure, imgOpts);
+
+    //Return the image in the response
+    return {
+        statusCode: 200,
+        headers: {'Content-Type': 'image/png'},
+        body: img.toString('base64'),
+        isBase64Encoded: true
+    };
 };
