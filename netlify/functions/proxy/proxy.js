@@ -1,4 +1,4 @@
-const Plotly = require('plotly.js-node');
+const Plotly = require('plotly.js');
 
 exports.handler = async function(event, context) {
     //Ensure this function only runs for POST requests
