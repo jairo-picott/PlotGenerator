@@ -1,12 +1,41 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Twin Data</title>
-        <link rel="stylesheet" type="text/css" href="style.css">
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    </head>
-    <body>
-        <div id="plot"><!-- Plotly chart will be drawn inside this DIV --></div>
-        <script src="app.js"></script>
-    </body>
+
+<head>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+	<div id="myDiv"></div>
+	<script>
+		function fetchDataAndPlot(sensorData) {
+  			fetch('https://twin-app.netlify.app/.netlify/functions/proxy', {
+    			method: 'POST',
+    			headers: {
+      				'Content-Type': 'application/json',
+    			},
+    			body: JSON.stringify(sensorData),
+  			})
+  			.then(response => response.json())
+  			.then(data => {
+    			const traces = data.map(item => ({
+      				x: item.map(point => new Date(point.last_changed)),
+      				y: item.map(point => point.state),
+      				mode: 'lines',
+      				name: item[0].entity_id,
+    			}));
+  
+    			const layout = {
+      				title: 'Sensor Data',
+    			};
+  
+    			Plotly.newPlot('myDiv', traces, layout);
+  			})
+  			.catch((error) => {
+    			console.error('Error:', error);
+  			});
+		}
+	</script>
+</body>
+
 </html>
