@@ -20,6 +20,14 @@
   
             const layout = {
               title: 'Sensor Data',
+              xaxis: {
+                autorange: true,
+                type: 'date'
+              },
+              yaxis: {
+                autorange: true,
+                type: 'linear'
+              }
             };
   
             Plotly.newPlot('myDiv', traces, layout);
