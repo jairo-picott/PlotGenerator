@@ -6,31 +6,51 @@
 </head>
 
 <body>
-	<div id="myDiv"></div>
+    <!-- This div will contain all the plots -->
+    <div id="plotContainer"></div>
+
 	<script>
         function fetchDataAndPlot(jsonData) {
-            const data = jsonData;
+            // Get the parent container and clear its content
+            const plotContainer = document.getElementById('plotContainer');
+            plotContainer.innerHTML = '';
 
-            const traces = data.map(item => ({
-              x: item.map(point => new Date(point.last_changed)),
-              y: item.map(point => point.state),
-              mode: 'lines',
-              name: item[0].entity_id,
-            }));
-  
-            const layout = {
-              title: 'Sensor Data',
-              xaxis: {
-                autorange: true,
-                type: 'date'
-              },
-              yaxis: {
-                autorange: true,
-                type: 'linear'
-              }
-            };
-  
-            Plotly.newPlot('myDiv', traces, layout);
+            jsonData.forEach((item, index) => {
+                // Create a new div for the current plot
+                const plotDiv = document.createElement('div');
+                plotDiv.id = 'myDiv' + (index + 1);
+                plotContainer.appendChild(plotDiv);
+
+                // Define the trace for the current plot
+                const trace = {
+                    x: item.map(point => new Date(point.last_changed)),
+                    y: item.map(point => point.state),
+                    mode: 'lines',
+                    name: item[0].entity_id,
+                };
+
+                // Check if the first 'state' value is numeric
+                const isNumeric = !isNaN(item[0].state);
+
+                // Change the trace type based on whether the data is numeric
+                trace.type = isNumeric ? 'scatter' : 'bar';
+                
+                // Define the layout for the current plot
+                const layout = {
+                    title: 'Sensor Data',
+                    xaxis: {
+                        autorange: true,
+                        type: 'date'
+                    },
+                    yaxis: {
+                        autorange: true,
+                        type: isNumeric ? 'linear' : 'category' // Use 'category' for non-numeric data
+                    }
+                };
+
+                // Create the plot
+                Plotly.newPlot(plotDiv.id, [trace], layout);
+            });
         }
 	</script>
 </body>
