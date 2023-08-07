@@ -1,4 +1,13 @@
 exports.handler = async (event, context) => {
+
+     // Check if event.body is undefined or empty
+    if (!event.body || event.body === '') {
+    return {
+        statusCode: 400,
+        body: 'Request body is missing or empty',
+    };
+    }
+    
     // Parse incoming JSON data from request body
     const data = JSON.parse(event.body);
   
